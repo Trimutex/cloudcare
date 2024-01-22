@@ -10,6 +10,7 @@ bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
 rm -rf ~/miniconda3/miniconda.sh
 echo "Creating miniconda3 environment..."
 ~/miniconda3/bin/conda init bash
+source ~/.bashrc
 conda env create -f environment.yaml
-conda activate myenv
+conda activate cloudcare
 echo "Setup complete!"
