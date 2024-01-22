@@ -1,0 +1,6 @@
+name: cloudcare
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - pip
