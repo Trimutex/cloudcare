@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "Updating the system..."
 sudo apt-get update && sudo apt-get -y upgrade
-echo "Installing htop and screen..."
-sudo apt-get install -y htop screen
+echo "Installing packages..."
+sudo apt-get install -y htop screen neovim
 echo "Installing miniconda3..."
 mkdir -p ~/miniconda3
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
