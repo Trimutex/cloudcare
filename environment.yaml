@@ -1,6 +1,16 @@
 name: cloudcare
+channel:
+  - pytorch
+  - nvidia
+  - defaults
 dependencies:
-  - python
+  - python=3.11
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - nvidia
+  - cudatoolkit
   - numpy
   - pandas
   - pip
