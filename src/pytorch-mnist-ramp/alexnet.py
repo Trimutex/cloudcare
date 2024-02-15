@@ -10,43 +10,66 @@ import torch.nn.functional as F
 # import matplotlib.pyplot as plt
 # import numpy as np
 
+# Constants
+BATCH_SIZE = 16
+CLASSES = 10
+
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=96,
-                               kernel_size=11, stride=4)
-        self.local_response1 = nn.LocalResponseNorm(size=5, alpha=0.0001,
-                                                    beta=0.75, k=2)
-        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
-        self.conv2 = nn.Conv2d(in_channels=96, out_channels=256,
-                               kernel_size=5, padding=2)
-        self.local_response2 = nn.LocalResponseNorm(size=5, alpha=0.0001,
-                                                    beta=0.75, k=2)
-        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
-        self.conv3 = nn.Conv2d(in_channels=256, out_channels=384,
-                               kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(in_channels=384, out_channels=384,
-                               kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(in_channels=384, out_channels=256,
-                               kernel_size=3, padding=1)
-        self.pool5 = nn.MaxPool2d(kernel_size=3, stride=2)
-        self.fc1 = nn.Linear(in_features=(9216), out_features=4096)
-        self.fc2 = nn.Linear(in_features=4096, out_features=4096)
-        self.fc3 = nn.Linear(in_features=4096, out_features=CLASSES)
+        self.conv01 = nn.Conv2d(in_channels=1, out_channels=96,
+                                kernel_size=11, stride=4, padding=0)
+        self.conv02 = nn.Conv2d(in_channels=96, out_channels=96,
+                                kernel_size=1)
+        self.conv03 = nn.Conv2d(in_channels=96, out_channels=96,
+                                kernel_size=1)
+        self.pool03 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv04 = nn.Conv2d(in_channels=96, out_channels=256,
+                                kernel_size=11, stride=4, padding=2)
+        self.conv05 = nn.Conv2d(in_channels=256, out_channels=256,
+                                kernel_size=1)
+        self.pool05 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv06 = nn.Conv2d(in_channels=256, out_channels=384,
+                                kernel_size=3, stride=1, padding=1)
+        self.conv07 = nn.Conv2d(in_channels=384, out_channels=384,
+                                kernel_size=1)
+        self.conv08 = nn.Conv2d(in_channels=384, out_channels=384,
+                                kernel_size=1)
+        self.conv09 = nn.Conv2d(in_channels=384, out_channels=10,
+                                kernel_size=3, stride=1, padding=1)
+        self.conv10 = nn.Conv2d(in_channels=10, out_channels=10,
+                                kernel_size=1)
+        self.conv11 = nn.Conv2d(in_channels=10, out_channels=10,
+                                kernel_size=1)
 
     def forward(self, x):
-        x = self.pool1(F.relu(self.local_response1(self.conv1(x))))
-        x = self.pool2(F.relu(self.local_response2(self.conv2(x))))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = self.pool5(F.relu(self.conv5(x)))
-        x = torch.flatten(x, 1)  # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
+        # Layer 01
+        x = F.relu(self.conv01(x))
+        # Layer 02
+        x = F.relu(self.conv02(x))
+        # Layer 03
+        x = self.pool03(F.relu(self.conv03(x)))
         x = F.dropout(x, 0.5)
-        x = F.relu(self.fc2(x))
+        # Layer 04
+        x = F.relu(self.conv04(x))
+        # Layer 05
+        x = self.pool05(F.relu(self.conv05(x)))
         x = F.dropout(x, 0.5)
-        x = self.fc3(x)
+        # Layer 06
+        x = F.relu(self.conv06(x))
+        # Layer 07
+        x = F.relu(self.conv07(x))
+        # Layer 08
+        x = F.relu(self.conv08(x))
+        x = F.dropout(x, 0.5)
+        # Layer 09
+        x = F.relu(self.conv09(x))
+        # Layer 10
+        x = F.relu(self.conv10(x))
+        # Layer 11
+        x = F.relu(self.conv11(x))
+        x = nn.AdaptiveAvgPool2d((1, 1))(x)
         return x
 
 
@@ -87,13 +110,12 @@ def test(model, device, test_loader):
         print('='*30)
 
 
-# Original globals
+# Global model setup
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 if device.type == 'cuda':
     print(torch.cuda.get_device_name(0))
-
 
 transform_conf = transforms.Compose([
     transforms.Resize((227, 227)),
@@ -101,18 +123,18 @@ transform_conf = transforms.Compose([
     transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-BATCH_SIZE = 64
 train_dataset = datasets.MNIST('~/temp/data/', train=True, download=True,
                                transform=transform_conf,)
 test_dataset = datasets.MNIST('~/temp/data/', train=False, download=True,
                               transform=transform_conf)
 
 train_loader = torch.utils.data.DataLoader(train_dataset,
-                                           batch_size=BATCH_SIZE, shuffle=True)
+                                           batch_size=BATCH_SIZE,
+                                           shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset,
-                                          batch_size=BATCH_SIZE, shuffle=True)
+                                          batch_size=BATCH_SIZE,
+                                          shuffle=True)
 
-CLASSES = 10
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device
 
