@@ -23,7 +23,7 @@ class Net(nn.Module):
         self.conv4=nn.Conv2d(in_channels=384,out_channels=384,kernel_size=3,padding=1)
         self.conv5=nn.Conv2d(in_channels=384,out_channels=256,kernel_size=3,padding=1)
         self.pool5=nn.MaxPool2d(kernel_size=3,stride=2)
-        self.fc1 = nn.Linear(in_features=(256*5*5),out_features=4096)
+        self.fc1 = nn.Linear(in_features=(9216),out_features=4096)
         self.fc2 = nn.Linear(in_features=4096,out_features=4096)
         self.fc3 = nn.Linear(in_features=4096,out_features=CLASSES)
 
