@@ -36,12 +36,9 @@ class Net(nn.Module):
                                 kernel_size=1)
         self.conv08 = nn.Conv2d(in_channels=384, out_channels=384,
                                 kernel_size=1)
-        self.conv09 = nn.Conv2d(in_channels=384, out_channels=10,
-                                kernel_size=3, stride=1, padding=1)
-        self.conv10 = nn.Conv2d(in_channels=10, out_channels=10,
-                                kernel_size=1)
-        self.conv11 = nn.Conv2d(in_channels=10, out_channels=10,
-                                kernel_size=1)
+        self.fc1 = nn.Linear(in_features=(1*1*384), out_features=4096)
+        self.fc2 = nn.Linear(in_features=4096, out_features=4096)
+        self.fc3 = nn.Linear(in_features=4096, out_features=CLASSES)
 
     def forward(self, x):
         # Layer 01
@@ -63,14 +60,15 @@ class Net(nn.Module):
         # Layer 08
         x = F.relu(self.conv08(x))
         x = F.dropout(x, 0.5)
-        # Layer 09
-        x = F.relu(self.conv09(x))
-        # Layer 10
-        x = F.relu(self.conv10(x))
-        # Layer 11
-        x = F.relu(self.conv11(x))
-        x = nn.AdaptiveAvgPool2d((1, 1))(x)
         x = torch.flatten(x, 1)  # flatten all dimensions except batch
+        # Layer 09
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, 0.5)
+        # Layer 10
+        x = F.relu(self.fc2(x))
+        x = F.dropout(x, 0.5)
+        # Layer 11
+        x = self.fc3(x)
         return x
 
 
