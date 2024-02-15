@@ -11,7 +11,7 @@ import torch.nn.functional as F
 # import numpy as np
 
 # Constants
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 CLASSES = 10
 
 
