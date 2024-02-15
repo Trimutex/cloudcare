@@ -11,7 +11,7 @@ import torch.nn.functional as F
 # import numpy as np
 
 # Constants
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 CLASSES = 10
 
 
@@ -70,6 +70,7 @@ class Net(nn.Module):
         # Layer 11
         x = F.relu(self.conv11(x))
         x = nn.AdaptiveAvgPool2d((1, 1))(x)
+        x = torch.flatten(x, 1)  # flatten all dimensions except batch
         return x
 
 
