@@ -11,8 +11,8 @@ rm -rf "$HOME/miniconda3/miniconda.sh"
 echo "Creating miniconda3 environment..."
 "$HOME/miniconda3/bin/conda" init bash
 source "$HOME/.bashrc"
-export PATH="$HOME/miniconda/bin:$PATH"
-source "$HOME/miniconda/bin/activate"
+export PATH="$HOME/miniconda3/bin:$PATH"
+source "$HOME/miniconda3/bin/activate"
 conda env create -f environment.yaml
 conda activate cloudcare
 echo "Setup complete!"
