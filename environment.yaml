@@ -1,5 +1,5 @@
 name: cloudcare
-channel:
+channels:
   - pytorch
   - nvidia
   - defaults
