@@ -9,7 +9,7 @@ dependencies:
   - torchvision
   - torchaudio
   - pytorch-cuda=12.1
-  - nvidia
+  - cuda
   - cudatoolkit
   - numpy
   - pandas
