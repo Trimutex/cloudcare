@@ -8,10 +8,10 @@ done
 
 for f in /tmp/extract/*.p.txt
 do
-    do grep -v '>' "$f" | cut -c 1-120 - | awk 'length($0)==120' > "$f".dnap;
+    grep -v '>' "$f" | cut -c 1-120 - | awk 'length($0)==120' > "$f".dnap;
 done
 
 for f in /tmp/extract/*.n.txt
 do
-    do grep -v '>' "$f" | cut -c 1-120 - | awk 'length($0)==120' > "$f".dnan;
+    grep -v '>' "$f" | cut -c 1-120 - | awk 'length($0)==120' > "$f".dnan;
 done
