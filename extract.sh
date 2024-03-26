@@ -1,5 +1,5 @@
 mkdir /tmp/extract
-for f in *.bed
+for f in /lfs/bed/*.bed
 do
     bedtools getfasta -bed "$f" -fi "/lfs/hg38.fa" -fo /tmp/extract/"$f"p.txt
     bedtools complement -i "$f" -g /lfs/hg38.fa.fai > /tmp/extract/"$f"n 
