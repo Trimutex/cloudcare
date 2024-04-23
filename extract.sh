@@ -4,6 +4,7 @@ do
     bedtools getfasta -bed "$f" -fi "/lfs/hg38.fa" -fo /tmp/extract/"$f"p.txt
     bedtools complement -i "$f" -g /lfs/hg38.fa.fai > /tmp/extract/"$f"n 
     bedtools getfasta -bed /tmp/extract/"$f"n -fi "/lfs/hg38.fa" -fo /tmp/extract/"$f"n.txt
+    rm /tmp/extract/"$f"n -f
 done
 
 for f in /tmp/extract/*p.txt
