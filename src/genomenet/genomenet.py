@@ -31,13 +31,12 @@ class GenomeNet:
         print("Doing ", self.epochs, " epochs")
 
     def one_hot_encoder(self, location):
-        # Encode here
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        labelsArray = np.zeros((len(sequences) * SEQ_LEN, 1), dtype=float)
-        # sequenceArray = np.zeros((len(sequences)))
-        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), CLASSES),
+        labelsArray = np.zeros((len(sequences) * SEQ_LEN, CLASSES),
+                               dtype=float)
+        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), 4),
                                    dtype=float)
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
