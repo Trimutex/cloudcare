@@ -15,7 +15,7 @@ class GenomeNet:
     def __init__(self, seed, epochs):
         self.seed = seed
         self.epochs = epochs
-        if torch.cuda.is_availabe():
+        if torch.cuda.is_available():
             self.device = torch.device('cuda')
         else:
             self.device = torch.device('cpu')
