@@ -40,13 +40,13 @@ class GenomeNet:
         for i, sequence in enumerate(sequences):
             for base in sequence:
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[0, i] = True
+                    one_hot_encoded[i, 0] = True
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[1, i] = True
+                    one_hot_encoded[i, 1] = True
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[2, i] = True
+                    one_hot_encoded[i, 2] = True
                 if base == 'T' or base == 't':
-                    one_hot_encoded[3, i] = True
+                    one_hot_encoded[i, 3] = True
         return GenomeSet(one_hot_encoded, labels)
 
     def load(self, location):
@@ -112,9 +112,9 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Conv1d(4, 6)
+        self.fc1 = nn.Conv1d(4, 6, 3)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Conv1d(6, CLASSES)
+        self.fc2 = nn.Conv1d(6, CLASSES, 1)
 
     def forward(self, x):
         x = self.fc1(x)
