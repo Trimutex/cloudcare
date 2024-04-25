@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import pandas as pd
+from torch.utils.data import Dataset, DataLoader
 
 # Constants
 BATCH_SIZE = 16
@@ -51,12 +52,10 @@ class GenomeNet:
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
         test_dataset = self.one_hot_encoder(location + "/test.dna")
-        self.train_loader = torch.utils.data.DataLoader(train_dataset,
-                                                        batch_size=BATCH_SIZE,
-                                                        shuffle=True)
-        self.test_loader = torch.utils.data.DataLoader(test_dataset,
-                                                       batch_size=BATCH_SIZE,
-                                                       shuffle=True)
+        self.train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
+                                       shuffle=True)
+        self.test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE,
+                                      shuffle=True)
 
     def train(self, current_epoch):
         print("inside train")
@@ -94,6 +93,7 @@ class GenomeNet:
                   .format(test_loss, correct, len(self.test_dataset),
                           100.*correct/len(self.test_dataset)))
             print('='*30)
+
 
 class GenomeSet(Dataset):
     def __init__(self, data, labels):
