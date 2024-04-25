@@ -52,7 +52,7 @@ class GenomeNet:
                     one_hot_encoded[i, 3] = True
                 if base == 'T' or base == 't':
                     one_hot_encoded[i, 4] = True
-        return one_hot_encoded
+        return torch.from_numpy(one_hot_encoded)
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
