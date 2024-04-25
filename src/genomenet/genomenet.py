@@ -11,7 +11,7 @@ BATCH_SIZE = 16
 CLASSES = 10
 
 
-class GenomeNet():
+class GenomeNet:
     def __init__(self, seed, epochs):
         self.seed = seed
         self.epochs = epochs
