@@ -103,8 +103,8 @@ class GenomeSet(Dataset):
 
     def __getitem__(self, index):
         item = {
-                'label': self.labels[index],
-                'input': self.data[index]
+                'input': self.data[index],
+                'label': self.labels[index]
         }
         return item
 
