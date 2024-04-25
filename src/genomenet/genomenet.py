@@ -16,10 +16,11 @@ class GenomeNet:
     def __init__(self, seed, epochs):
         self.seed = seed
         self.epochs = epochs
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-        else:
-            self.device = torch.device('cpu')
+        #if torch.cuda.is_available():
+        #    self.device = torch.device('cuda')
+        #else:
+            #self.device = torch.device('cpu')
+        self.device = torch.device('cpu')
         self.model = Net().to(self.device)
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=0.0001)
         self.loss_fn = nn.CrossEntropyLoss()
@@ -179,5 +180,4 @@ class Net(nn.Module):
         x = F.relu(self.conv10(x))
         # Layer 11
         x = F.relu(self.conv11(x))
-        x = nn.AdaptiveAvgPool2d((1, 1))(x)
         return x
