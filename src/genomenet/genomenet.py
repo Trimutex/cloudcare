@@ -49,8 +49,8 @@ class GenomeNet:
         return dataset
 
     def load(self, location):
-        train_dataset = self.one_hot_encoder(location + "/train.dna")
-        test_dataset = self.one_hot_encoder(location + "/test.dna")
+        train_dataset = self.one_hot_encoder(location + "/train-light.dna")
+        test_dataset = self.one_hot_encoder(location + "/test-light.dna")
         self.train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
                                        shuffle=True)
         self.test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE,
