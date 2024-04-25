@@ -7,7 +7,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 # Constants
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 CLASSES = 1
 SEQ_LEN = 120
 
@@ -128,29 +128,29 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv01 = nn.Conv2d(in_channels=4, out_channels=96,
-                                kernel_size=11, stride=4, padding=0)
-        self.conv02 = nn.Conv2d(in_channels=96, out_channels=96,
+        self.conv01 = nn.Conv1d(in_channels=4, out_channels=96,
+                                kernel_size=8, stride=4, padding=0)
+        self.conv02 = nn.Conv1d(in_channels=96, out_channels=96,
                                 kernel_size=1)
-        self.conv03 = nn.Conv2d(in_channels=96, out_channels=96,
+        self.conv03 = nn.Conv1d(in_channels=96, out_channels=96,
                                 kernel_size=1)
-        self.pool03 = nn.MaxPool2d(kernel_size=3, stride=2)
-        self.conv04 = nn.Conv2d(in_channels=96, out_channels=256,
+        self.pool03 = nn.MaxPool1d(kernel_size=3, stride=2)
+        self.conv04 = nn.Conv1d(in_channels=96, out_channels=256,
                                 kernel_size=11, stride=4, padding=2)
-        self.conv05 = nn.Conv2d(in_channels=256, out_channels=256,
+        self.conv05 = nn.Conv1d(in_channels=256, out_channels=256,
                                 kernel_size=1)
-        self.pool05 = nn.MaxPool2d(kernel_size=3, stride=2)
-        self.conv06 = nn.Conv2d(in_channels=256, out_channels=384,
+        self.pool05 = nn.MaxPool1d(kernel_size=3, stride=2)
+        self.conv06 = nn.Conv1d(in_channels=256, out_channels=384,
                                 kernel_size=3, stride=1, padding=1)
-        self.conv07 = nn.Conv2d(in_channels=384, out_channels=384,
+        self.conv07 = nn.Conv1d(in_channels=384, out_channels=384,
                                 kernel_size=1)
-        self.conv08 = nn.Conv2d(in_channels=384, out_channels=384,
+        self.conv08 = nn.Conv1d(in_channels=384, out_channels=384,
                                 kernel_size=1)
-        self.conv09 = nn.Conv2d(in_channels=384, out_channels=10,
+        self.conv09 = nn.Conv1d(in_channels=384, out_channels=10,
                                 kernel_size=3, stride=1, padding=1)
-        self.conv10 = nn.Conv2d(in_channels=10, out_channels=10,
+        self.conv10 = nn.Conv1d(in_channels=10, out_channels=10,
                                 kernel_size=1)
-        self.conv11 = nn.Conv2d(in_channels=10, out_channels=CLASSES,
+        self.conv11 = nn.Conv1d(in_channels=10, out_channels=CLASSES,
                                 kernel_size=1)
 
     def forward(self, x):
