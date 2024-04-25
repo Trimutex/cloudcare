@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 
 # Constants
 BATCH_SIZE = 16
-CLASSES = 4
+CLASSES = 1
 SEQ_LEN = 120
 
 
@@ -35,12 +35,13 @@ class GenomeNet:
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        labelsArray = np.zeros((len(sequences) * SEQ_LEN, 4), dtype=float)
+        labelsArray = np.zeros((len(sequences) * SEQ_LEN, 1), dtype=float)
         # sequenceArray = np.zeros((len(sequences)))
-        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), 4), dtype=float)
+        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), CLASSES),
+                                   dtype=float)
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
-                labelsArray[i*SEQ_LEN + j] = labels[i]
+                labelsArray[i*SEQ_LEN + j] = int(labels[i])
                 if base == 'A' or base == 'a':
                     one_hot_encoded[i*SEQ_LEN + j][0] = 1.
                     one_hot_encoded[i*SEQ_LEN + j][1] = 0.
