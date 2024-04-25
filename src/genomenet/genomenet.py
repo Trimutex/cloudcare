@@ -61,19 +61,19 @@ class GenomeNet:
     def train(self, current_epoch):
         print("inside train")
         self.model.train()
-        for batch_ids, (img, classes) in enumerate(self.train_loader):
-            classes = classes.type(torch.LongTensor)
-            img, classes = img.to(self.device), self.classes.to(self.device)
+        for batch_ids, (input, label) in enumerate(self.train_loader):
+            input = input.to(self.device),
+            label = self.classes.to(self.device)
             torch.autograd.set_detect_anomaly(True)
             self.optimizer.zero_grad()
-            output = self.model(img)
-            loss = self.loss_fn(output, classes)
+            output = self.model(input)
+            loss = self.loss_fn(output, label)
             loss.backward()
             self.optimizer.step()
         if (batch_ids + 1) % 2 == 0:
             print("Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
                 current_epoch,
-                batch_ids * len(img),
+                batch_ids * len(input),
                 len(self.train_loader.dataset),
                 100.*batch_ids / len(self.train_loader),
                 loss.item()))
@@ -83,12 +83,13 @@ class GenomeNet:
         test_loss = 0
         correct = 0
         with torch.no_grad():
-            for img, classes in self.test_loader:
-                img, classes = img.to(self.device), classes.to(self.device)
-                y_hat = self.model(img)
-                test_loss += F.nll_loss(y_hat, classes, reduction='sum').item()
+            for input, labels in self.test_loader:
+                input = input.to(self.device)
+                labels = labels.to(self.device)
+                y_hat = self.model(input)
+                test_loss += F.nll_loss(y_hat, labels, reduction='sum').item()
                 _, y_pred = torch.max(y_hat, 1)
-                correct += (y_pred == classes).sum().item()
+                correct += (y_pred == labels).sum().item()
             test_loss /= len(self.test_dataset)
             print("\nTest set: Average loss: {:.0f},Accuracy:{}/{} ({:.0f}%)\n"
                   .format(test_loss, correct, len(self.test_dataset),
