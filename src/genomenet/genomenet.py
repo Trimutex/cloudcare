@@ -180,4 +180,5 @@ class Net(nn.Module):
         x = F.relu(self.conv10(x))
         # Layer 11
         x = F.relu(self.conv11(x))
+        x = nn.AdaptiveAvgPool2d((1, 1))(x)
         return x
