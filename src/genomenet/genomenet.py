@@ -5,6 +5,7 @@ import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import pandas as pd
 
 # Constants
 BATCH_SIZE = 16
@@ -35,12 +36,12 @@ class GenomeNet:
 
     def one_hot_encoder(self, location):
         # Encode here
-        label = np.array([], dtype=bool)
-        sequence = np.array([], dtype=str)
-        label, sequence = np.genfromtxt(location, delimiter='\t', unpack=True)
+        data = pd.read_csv(location, sep='\t', header=None)
+        labels = data[0].values
+        sequences = data[1].values
         for i in range(0, 5):
-            print(label[i], sequence[i])
-        return sequence
+            print(labels[i], sequences[i])
+        return sequences
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
