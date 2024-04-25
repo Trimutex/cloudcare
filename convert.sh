@@ -29,10 +29,13 @@ valid_count=$((merge_size*5/100))
 # Create training file (random 75%)
 echo "Producing training file: train.dna"
 head -n "$train_count" "$DATA_DIR/shuffled.dna" > "$DATA_DIR/train.dna"
+head -n 8000 "$DATA_DIR/train.dna" > "$DATA_DIR/train-light.dna"
 
 # Create test file (random 20%)
 echo "Producing testing file: test.dna"
 sed -n $((train_count+1)),$((train_count+test_count+1))p "$DATA_DIR/shuffled.dna" > "$DATA_DIR/test.dna"
+echo "Producing lightweight testing file: test-light.dna"
+head -n 2000 "$DATA_DIR/test.dna" > "$DATA_DIR/test-light.dna"
 
 # Create validation file (random 5%)
 echo "Producing validation file: valid.dna"
