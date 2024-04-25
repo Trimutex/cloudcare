@@ -34,20 +34,18 @@ class GenomeNet:
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        one_hot_encoded = np.zeros((len(sequences), 5))
+        one_hot_encoded = np.zeros((len(sequences), 4))
         for i, sequence in enumerate(sequences):
-            one_hot_encoded[i, 0] = labels[i]
             for base in sequence:
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i, 1] = True
+                    one_hot_encoded[i, 0] = True
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i, 2] = True
+                    one_hot_encoded[i, 1] = True
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i, 3] = True
+                    one_hot_encoded[i, 2] = True
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i, 4] = True
-        dataset = GenomeSet(torch.from_numpy(one_hot_encoded),
-                            torch.from_numpy(labels))
+                    one_hot_encoded[i, 3] = True
+        dataset = GenomeSet(one_hot_encoded, labels)
         return dataset
 
     def load(self, location):
@@ -97,8 +95,8 @@ class GenomeNet:
 
 class GenomeSet(Dataset):
     def __init__(self, data, labels):
-        self.data = data
-        self.labels = labels
+        self.data = torch.stack(torch.tensor(data))
+        self.labels = torch.tensor(labels)
 
     def __len__(self):
         return len(self.data)
