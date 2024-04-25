@@ -33,6 +33,7 @@ class GenomeNet:
         print(self.device)
         if self.device.type == 'cuda':
             print(torch.cuda.get_device_name(0))
+        print("Doing {} epochs", self.epochs)
 
     def one_hot_encoder(self, location):
         # Encode here
