@@ -1,6 +1,4 @@
 import torch
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,11 +21,6 @@ class GenomeNet:
         self.model = Net().to(self.device)
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=0.0001)
         self.loss_fn = nn.CrossEntropyLoss()
-        self.transform_conf = transforms.Compose([
-            transforms.Resize((227, 227)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-            ])
 
     def info(self):
         print(self.device)
@@ -52,7 +45,8 @@ class GenomeNet:
                     one_hot_encoded[i, 3] = True
                 if base == 'T' or base == 't':
                     one_hot_encoded[i, 4] = True
-        return torch.from_numpy(one_hot_encoded)
+        dataset = GenomeSet(one_hot_encoded, labels)
+        return torch.from_numpy(dataset)
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
@@ -100,6 +94,21 @@ class GenomeNet:
                   .format(test_loss, correct, len(self.test_dataset),
                           100.*correct/len(self.test_dataset)))
             print('='*30)
+
+class GenomeSet(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        item = {
+                'label': self.labels[index],
+                'input': self.data[index]
+        }
+        return item
 
 
 class Net(nn.Module):
