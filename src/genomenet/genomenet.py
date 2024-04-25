@@ -35,7 +35,7 @@ class GenomeNet:
 
     def one_hot_encoder(self, location):
         # Encode here
-        label, sequence = np.genfromtxt(location, delimiter='\t')
+        label, sequence = np.genfromtxt(location, delimiter='\t', unpack=True)
         for i in range(0, 5):
             print(label[i], sequence[i])
         return sequence
