@@ -7,7 +7,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 # Constants
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 CLASSES = 4
 SEQ_LEN = 120
 
@@ -35,19 +35,33 @@ class GenomeNet:
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        one_hot_encoded = np.zeros((len(sequences)*SEQ_LEN, CLASSES))
-        bases = ['A', 'C', 'G', 'T']
+        labelsArray = np.zeros((len(sequences) * SEQ_LEN, 4), dtype=float)
+        # sequenceArray = np.zeros((len(sequences)))
+        one_hot_encoded = np.zeros((4, SEQ_LEN*len(sequences)), dtype=float)
         for i, sequence in enumerate(sequences):
-            for base in sequence:
+            for j, base in enumerate(sequence):
+                labelsArray[i*SEQ_LEN + j] = labels[i]
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i, 0] = True
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i, 1] = True
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i, 2] = True
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i, 3] = True
-        return GenomeSet(one_hot_encoded, labels)
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 1.
+        return GenomeSet(one_hot_encoded, labelsArray)
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train-light.dna")
@@ -61,8 +75,8 @@ class GenomeNet:
         print("inside train")
         self.model.train()
         for batch_ids, (input, label) in enumerate(self.train_loader):
-            input = input.to(self.device).type(torch.float)
-            label = label.to(self.device).type(torch.float)
+            label = label.type(torch.float)
+            input, label = input.to(self.device), label.to(self.device)
             torch.autograd.set_detect_anomaly(True)
             self.optimizer.zero_grad()
             output = self.model(input)
@@ -98,8 +112,8 @@ class GenomeNet:
 
 class GenomeSet(Dataset):
     def __init__(self, data, labels):
-        self.data = torch.stack([torch.from_numpy(data) for d in data])
-        self.labels = torch.from_numpy(labels)
+        self.data = torch.stack([torch.from_numpy(data).float() for d in data])
+        self.labels = torch.from_numpy(labels).float()
 
     def __len__(self):
         return len(self.data)
@@ -112,12 +126,14 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Conv1d(4, 6, 3)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Conv1d(6, CLASSES, 1)
+        self.fc1 = nn.Linear(4, 32)
+        self.conv1 = nn.Conv1d(32, 32, kernel_size=1, stride=4)
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.fc2 = nn.Linear(32, CLASSES)
 
     def forward(self, x):
         x = self.fc1(x)
-        x = self.relu(x)
+        x = self.conv1(x)
+        x = self.pool(x)
         x = self.fc2(x)
         return x
