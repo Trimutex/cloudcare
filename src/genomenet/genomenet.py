@@ -37,45 +37,47 @@ class GenomeNet:
         sequences = data[1].values
         labelsArray = np.zeros((len(sequences) * SEQ_LEN, 4), dtype=float)
         # sequenceArray = np.zeros((len(sequences)))
-        one_hot_encoded = np.zeros((4, SEQ_LEN*len(sequences)), dtype=float)
+        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), 4), dtype=float)
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
                 labelsArray[i*SEQ_LEN + j] = labels[i]
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[0][i*SEQ_LEN + j] = 1.
-                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[1][i*SEQ_LEN + j] = 1.
-                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[2][i*SEQ_LEN + j] = 1.
-                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
                 if base == 'T' or base == 't':
-                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
-                    one_hot_encoded[3][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[i*SEQ_LEN + j] = 1.
         return GenomeSet(one_hot_encoded, labelsArray)
 
     def load(self, location):
-        train_dataset = self.one_hot_encoder(location + "/train-light.dna")
-        test_dataset = self.one_hot_encoder(location + "/test-light.dna")
-        self.train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
+        self.train_dataset = self.one_hot_encoder(location + "/train-light.dna")
+        self.test_dataset = self.one_hot_encoder(location + "/test-light.dna")
+        self.train_loader = DataLoader(self.train_dataset,
+                                       batch_size=BATCH_SIZE,
                                        shuffle=True)
-        self.test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE,
+        self.test_loader = DataLoader(self.test_dataset,
+                                      batch_size=BATCH_SIZE,
                                       shuffle=True)
 
     def train(self, current_epoch):
         print("inside train")
         self.model.train()
         for batch_ids, (input, label) in enumerate(self.train_loader):
-            label = label.type(torch.float)
+            label = label.type(torch.LongTensor)
             input, label = input.to(self.device), label.to(self.device)
             torch.autograd.set_detect_anomaly(True)
             self.optimizer.zero_grad()
@@ -97,8 +99,8 @@ class GenomeNet:
         correct = 0
         with torch.no_grad():
             for input, label in self.test_loader:
-                input = input.to(self.device)
-                label = label.to(self.device)
+                label = label.type(torch.LongTensor)
+                input, label = input.to(self.device), label.to(self.device)
                 y_hat = self.model(input)
                 test_loss += F.nll_loss(y_hat, label, reduction='sum').item()
                 _, y_pred = torch.max(y_hat, 1)
@@ -126,14 +128,11 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(4, 32)
-        self.conv1 = nn.Conv1d(32, 32, kernel_size=1, stride=4)
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
-        self.fc2 = nn.Linear(32, CLASSES)
+        self.linear1 = nn.Linear(4, 16)
+        self.linear2 = nn.Linear(16, CLASSES)
+        self.relu = F.relu
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = self.conv1(x)
-        x = self.pool(x)
-        x = self.fc2(x)
+        x = self.relu(self.linear1(x))
+        x = self.relu(self.linear2(x))
         return x
