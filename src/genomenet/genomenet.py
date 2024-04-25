@@ -36,31 +36,31 @@ class GenomeNet:
         sequences = data[1].values
         labelsArray = np.zeros((len(sequences) * SEQ_LEN, CLASSES),
                                dtype=float)
-        one_hot_encoded = np.zeros((SEQ_LEN*len(sequences), 4),
+        one_hot_encoded = np.zeros((4, SEQ_LEN*len(sequences)),
                                    dtype=float)
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
                 labelsArray[i*SEQ_LEN + j] = int(labels[i])
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 1.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 0.
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 1.
+                    one_hot_encoded[0][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[1][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[2][i*SEQ_LEN + j] = 0.
+                    one_hot_encoded[3][i*SEQ_LEN + j] = 1.
         return GenomeSet(one_hot_encoded, labelsArray)
 
     def load(self, location):
