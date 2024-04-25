@@ -46,8 +46,9 @@ class GenomeNet:
                     one_hot_encoded[i, 3] = True
                 if base == 'T' or base == 't':
                     one_hot_encoded[i, 4] = True
-        dataset = GenomeSet(one_hot_encoded, labels)
-        return torch.from_numpy(dataset)
+        dataset = GenomeSet(torch.from_numpy(one_hot_encoded),
+                            torch.from_numpy(labels))
+        return dataset
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
