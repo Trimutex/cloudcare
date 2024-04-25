@@ -39,9 +39,19 @@ class GenomeNet:
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        for i in range(0, 5):
-            print(labels[i], sequences[i])
-        return sequences
+        one_hot_encoded = np.zeros((len(sequences), 5))
+        for i, sequence in enumerate(sequences):
+            one_hot_encoded[i, 0] = labels[i]
+            for base in sequence:
+                if base == 'A' or base == 'a':
+                    one_hot_encoded[i, 1] = True
+                if base == 'C' or base == 'c':
+                    one_hot_encoded[i, 2] = True
+                if base == 'G' or base == 'g':
+                    one_hot_encoded[i, 3] = True
+                if base == 'T' or base == 't':
+                    one_hot_encoded[i, 4] = True
+        return one_hot_encoded
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train.dna")
