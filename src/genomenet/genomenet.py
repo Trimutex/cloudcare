@@ -114,9 +114,9 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(in_channels=4, out_channels=8)
+        self.fc1 = nn.Linear(4, 8)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(in_channels=8, out_channels=2)
+        self.fc2 = nn.Linear(8, 2)
 
     def forward(self, x):
         x = self.fc1(x)
