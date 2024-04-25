@@ -8,6 +8,10 @@ if __name__ == '__main__':
     network = genomenet.GenomeNet(seed, EPOCHS)
     network.info()
     network.load("../../data")
-    for current_epoch in range(1, network.epochs + 1):
-        network.train(current_epoch)
-        network.test()
+    for data,label in network.train_loader:
+        print(data)
+        print(label)
+        break
+    #for current_epoch in range(1, network.epochs + 1):
+    #    network.train(current_epoch)
+    #    network.test()
