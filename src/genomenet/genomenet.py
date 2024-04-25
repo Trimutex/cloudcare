@@ -95,7 +95,7 @@ class GenomeNet:
 
 class GenomeSet(Dataset):
     def __init__(self, data, labels):
-        self.data = torch.stack(torch.tensor(data))
+        self.data = torch.stack([torch.tensor(data) for d in data])
         self.labels = torch.tensor(labels)
 
     def __len__(self):
