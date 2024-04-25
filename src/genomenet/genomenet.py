@@ -7,8 +7,9 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 # Constants
-BATCH_SIZE = 16
-CLASSES = 10
+BATCH_SIZE = 64
+CLASSES = 4
+SEQ_LEN = 120
 
 
 class GenomeNet:
@@ -34,19 +35,19 @@ class GenomeNet:
         data = pd.read_csv(location, sep='\t', header=None)
         labels = data[0].values
         sequences = data[1].values
-        one_hot_encoded = np.zeros((len(sequences), 4))
+        one_hot_encoded = np.zeros((len(sequences)*SEQ_LEN, CLASSES))
+        bases = ['A', 'C', 'G', 'T']
         for i, sequence in enumerate(sequences):
             for base in sequence:
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i, 0] = True
+                    one_hot_encoded[0, i] = True
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i, 1] = True
+                    one_hot_encoded[1, i] = True
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i, 2] = True
+                    one_hot_encoded[2, i] = True
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i, 3] = True
-        dataset = GenomeSet(one_hot_encoded, labels)
-        return dataset
+                    one_hot_encoded[3, i] = True
+        return GenomeSet(one_hot_encoded, labels)
 
     def load(self, location):
         train_dataset = self.one_hot_encoder(location + "/train-light.dna")
@@ -60,6 +61,8 @@ class GenomeNet:
         print("inside train")
         self.model.train()
         for batch_ids, (input, label) in enumerate(self.train_loader):
+            input = input.to(self.device).type(torch.float)
+            label = label.to(self.device).type(torch.float)
             torch.autograd.set_detect_anomaly(True)
             self.optimizer.zero_grad()
             output = self.model(input)
@@ -79,13 +82,13 @@ class GenomeNet:
         test_loss = 0
         correct = 0
         with torch.no_grad():
-            for input, labels in self.test_loader:
+            for input, label in self.test_loader:
                 input = input.to(self.device)
-                labels = labels.to(self.device)
+                label = label.to(self.device)
                 y_hat = self.model(input)
-                test_loss += F.nll_loss(y_hat, labels, reduction='sum').item()
+                test_loss += F.nll_loss(y_hat, label, reduction='sum').item()
                 _, y_pred = torch.max(y_hat, 1)
-                correct += (y_pred == labels).sum().item()
+                correct += (y_pred == label).sum().item()
             test_loss /= len(self.test_dataset)
             print("\nTest set: Average loss: {:.0f},Accuracy:{}/{} ({:.0f}%)\n"
                   .format(test_loss, correct, len(self.test_dataset),
@@ -95,26 +98,23 @@ class GenomeNet:
 
 class GenomeSet(Dataset):
     def __init__(self, data, labels):
-        self.data = torch.stack([torch.tensor(data) for d in data])
-        self.labels = torch.tensor(labels)
+        self.data = torch.stack([torch.from_numpy(data) for d in data])
+        self.labels = torch.from_numpy(labels)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
-        item = {
-                'input': self.data[index],
-                'label': self.labels[index]
-        }
-        return item
+        data, label = self.data[index], self.labels[index]
+        return data, label
 
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(4, 8)
+        self.fc1 = nn.Conv1d(4, 6)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(8, 2)
+        self.fc2 = nn.Conv1d(6, CLASSES)
 
     def forward(self, x):
         x = self.fc1(x)
