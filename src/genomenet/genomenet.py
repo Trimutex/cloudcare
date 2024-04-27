@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
 # Constants
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 CLASSES = 4
 SEQ_LEN = 120
 
@@ -33,37 +33,32 @@ class GenomeNet:
 
     def one_hot_encoder(self, location):
         data = pd.read_csv(location, sep='\t', header=None)
-        labels = data[0].values
+        labels = np.array(data[0].values)
         sequences = data[1].values
-        labelsArray = np.zeros(len(sequences) * SEQ_LEN)
-        one_hot_encoded = np.eye(SEQ_LEN*len(sequences), 4)
+        one_hot_encoded = np.zeros((len(sequences), SEQ_LEN, 4))
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
-                if (int(labels[i]) == 1):
-                    labelsArray[i*SEQ_LEN + j] = 1
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[i][j][0] = 1.
+                    one_hot_encoded[i][j][1] = 0.
+                    one_hot_encoded[i][j][2] = 0.
+                    one_hot_encoded[i][j][3] = 0.
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[i][j][0] = 0.
+                    one_hot_encoded[i][j][1] = 1.
+                    one_hot_encoded[i][j][2] = 0.
+                    one_hot_encoded[i][j][3] = 0.
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 1.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 0.
+                    one_hot_encoded[i][j][0] = 0.
+                    one_hot_encoded[i][j][1] = 0.
+                    one_hot_encoded[i][j][2] = 1.
+                    one_hot_encoded[i][j][3] = 0.
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i*SEQ_LEN + j][0] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][1] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][2] = 0.
-                    one_hot_encoded[i*SEQ_LEN + j][3] = 1.
-        print("one-hot encoded shape:", one_hot_encoded.shape)
-        print("labels array shape:", labelsArray.shape)
-        return GenomeSet(one_hot_encoded, labelsArray)
+                    one_hot_encoded[i][j][0] = 0.
+                    one_hot_encoded[i][j][1] = 0.
+                    one_hot_encoded[i][j][2] = 0.
+                    one_hot_encoded[i][j][3] = 1.
+        return GenomeSet(one_hot_encoded, labels)
 
     def load(self, location):
         self.train_dataset = self.one_hot_encoder(location + "/train-light.dna")
@@ -132,12 +127,12 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv01 = nn.Conv1d(in_channels=4, out_channels=96,
-                                kernel_size=1, stride=4)
+        self.conv01 = nn.Conv1d(in_channels=120, out_channels=96,
+                                kernel_size=4, stride=4)
         self.pool01 = nn.MaxPool1d(kernel_size=1, stride=2)
         self.conv02 = nn.Conv1d(in_channels=96, out_channels=256,
                                 kernel_size=5, padding=2)
-        self.pool02 = nn.MaxPool1d(kernel_size=3, stride=2)
+        self.pool02 = nn.MaxPool1d(kernel_size=1, stride=2)
         self.conv03 = nn.Conv1d(in_channels=256, out_channels=384,
                                 kernel_size=3, padding=1)
         self.conv04 = nn.Conv1d(in_channels=384, out_channels=384,
@@ -145,12 +140,11 @@ class Net(nn.Module):
         self.conv05 = nn.Conv1d(in_channels=384, out_channels=BATCH_SIZE,
                                 kernel_size=3, padding=1)
         self.pool05 = nn.MaxPool1d(kernel_size=1, stride=2)
-        self.fc1 = nn.Linear(1, 4096)
+        self.fc1 = nn.Linear(16, 4096)
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, CLASSES)
 
     def forward(self, x):
-        x = x.permute(1, 0)
         x = self.pool01(F.relu(self.conv01(x)))
         x = self.pool02(F.relu(self.conv02(x)))
         x = F.relu(self.conv03(x))
