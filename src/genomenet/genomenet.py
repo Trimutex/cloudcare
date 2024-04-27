@@ -144,18 +144,18 @@ class Net(nn.Module):
                                 kernel_size=3, padding=1)
         self.conv05 = nn.Conv1d(in_channels=384, out_channels=BATCH_SIZE,
                                 kernel_size=3, padding=1)
-        self.pool05 = nn.MaxPool1d(kernel_size=3, stride=2)
-        self.fc1 = nn.Linear((BATCH_SIZE // 4), 4096)
+        self.pool05 = nn.MaxPool1d(kernel_size=1, stride=2)
+        self.fc1 = nn.Linear(1, 4096)
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, CLASSES)
 
     def forward(self, x):
         x = x.permute(1, 0)
-        x = F.relu(self.conv01(x))
-        x = F.relu(self.conv02(x))
+        x = self.pool01(F.relu(self.conv01(x)))
+        x = self.pool02(F.relu(self.conv02(x)))
         x = F.relu(self.conv03(x))
         x = F.relu(self.conv04(x))
-        x = F.relu(self.conv05(x))
+        x = self.pool05(F.relu(self.conv05(x)))
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, 0.5)
