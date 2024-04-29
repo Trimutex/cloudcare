@@ -144,10 +144,10 @@ class Net(nn.Module):
                                 kernel_size=3, padding=1)
         self.conv04 = nn.Conv1d(in_channels=384, out_channels=384,
                                 kernel_size=3, padding=1)
-        self.conv05 = nn.Conv1d(in_channels=384, out_channels=BATCH_SIZE,
+        self.conv05 = nn.Conv1d(in_channels=384, out_channels=256,
                                 kernel_size=3, padding=1)
         self.pool05 = nn.MaxPool1d(kernel_size=3, stride=2)
-        self.fc1 = nn.Linear(32, 4096)
+        self.fc1 = nn.Linear(512, 4096)
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, CLASSES)
 
