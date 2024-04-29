@@ -1,7 +1,18 @@
 DATA_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/data"
-mkdir $DATA_DIR
+
+if ! test -d "$DATA_DIR"; then
+    mkdir $DATA_DIR
+fi
+
+if ! test -d "$1"; then
+    echo "This script looks for the directory containing .bed files"
+    echo "usage: extract.sh /PATH/TO/DIR/"
+    exit 1
+fi
+
 mkdir /tmp/extract
-for file in "$1"
+
+for file in "$1"/*.bed
 do
     filename=$(basename -- "$file")
     bedtools getfasta -bed "$file" -fi "/lfs/hg38.fa" -fo /tmp/extract/"$filename"p
@@ -16,3 +27,5 @@ do
     echo "Finished with a negative file, cleaning..."
     rm /tmp/extract/"$filename"n -f
 done
+
+rmdir /tmp/extract
