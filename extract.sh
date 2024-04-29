@@ -9,10 +9,10 @@ do
     bedtools getfasta -bed /tmp/extract/"$filename"c -fi "/lfs/hg38.fa" -fo /tmp/extract/"$filename"n
     echo "Finished with a complement file, cleaning..."
     rm /tmp/extract/"$filename"c -f
-    grep -v '>' /tmp/extract/"$file"p | cut -c 1-120 - | awk 'length($0)==120' > $DATA_DIR/"$filename".dnap;
+    grep -v '>' /tmp/extract/"$filename"p | cut -c 1-120 - | awk 'length($0)==120' > $DATA_DIR/"$filename".dnap;
     echo "Finished with a positive file, cleaning..."
     rm /tmp/extract/"$filename"p -f
-    grep -v '>' /tmp/extract/"$file"n | cut -c 1-120 - | awk 'length($0)==120' > $DATA_DIR/"$filename".dnan;
+    grep -v '>' /tmp/extract/"$filename"n | cut -c 1-120 - | awk 'length($0)==120' > $DATA_DIR/"$filename".dnan;
     echo "Finished with a negative file, cleaning..."
     rm /tmp/extract/"$filename"n -f
 done
