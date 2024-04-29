@@ -24,40 +24,49 @@ class GenomeNet:
         self.model = Net().to(self.device)
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=0.0001)
         self.loss_fn = nn.CrossEntropyLoss()
-
-    def info(self):
         print(self.device)
         if self.device.type == 'cuda':
             print(torch.cuda.get_device_name(0))
         print("Doing ", self.epochs, " epochs")
 
+    def info(self):
+        for data, label in network.train_loader:
+            print("Loaded data details:")
+            print("\tdata:", data)
+            print("\tlabel:", label)
+            print("\tdata shape:", data.shape)
+            print("\tlabel shape:", label.shape)
+            print("\tdata length:", len(data))
+            print("\tlabel length:", len(label))
+            break
+
     def one_hot_encoder(self, location):
         data = pd.read_csv(location, sep='\t', header=None)
         labels = np.array(data[0].values)
         sequences = data[1].values
-        one_hot_encoded = np.zeros((len(sequences), SEQ_LEN, 4))
+        one_hot_encoded = np.zeros((len(sequences), 4, SEQ_LEN))
         for i, sequence in enumerate(sequences):
             for j, base in enumerate(sequence):
                 if base == 'A' or base == 'a':
-                    one_hot_encoded[i][j][0] = 1.
-                    one_hot_encoded[i][j][1] = 0.
-                    one_hot_encoded[i][j][2] = 0.
-                    one_hot_encoded[i][j][3] = 0.
+                    one_hot_encoded[i][0][j] = 1.
+                    one_hot_encoded[i][1][j] = 0.
+                    one_hot_encoded[i][2][j] = 0.
+                    one_hot_encoded[i][3][j] = 0.
                 if base == 'C' or base == 'c':
-                    one_hot_encoded[i][j][0] = 0.
-                    one_hot_encoded[i][j][1] = 1.
-                    one_hot_encoded[i][j][2] = 0.
-                    one_hot_encoded[i][j][3] = 0.
+                    one_hot_encoded[i][0][j] = 0.
+                    one_hot_encoded[i][1][j] = 1.
+                    one_hot_encoded[i][2][j] = 0.
+                    one_hot_encoded[i][3][j] = 0.
                 if base == 'G' or base == 'g':
-                    one_hot_encoded[i][j][0] = 0.
-                    one_hot_encoded[i][j][1] = 0.
-                    one_hot_encoded[i][j][2] = 1.
-                    one_hot_encoded[i][j][3] = 0.
+                    one_hot_encoded[i][0][j] = 0.
+                    one_hot_encoded[i][1][j] = 0.
+                    one_hot_encoded[i][2][j] = 1.
+                    one_hot_encoded[i][3][j] = 0.
                 if base == 'T' or base == 't':
-                    one_hot_encoded[i][j][0] = 0.
-                    one_hot_encoded[i][j][1] = 0.
-                    one_hot_encoded[i][j][2] = 0.
-                    one_hot_encoded[i][j][3] = 1.
+                    one_hot_encoded[i][0][j] = 0.
+                    one_hot_encoded[i][1][j] = 0.
+                    one_hot_encoded[i][2][j] = 0.
+                    one_hot_encoded[i][3][j] = 1.
         return GenomeSet(one_hot_encoded, labels)
 
     def load(self, location):
@@ -113,8 +122,6 @@ class GenomeSet(Dataset):
     def __init__(self, data, labels):
         self.data = torch.from_numpy(data).float()
         self.labels = torch.from_numpy(labels).float()
-        print("data shape:", self.data.shape)
-        print("labels shape:", self.labels.shape)
 
     def __len__(self):
         return len(self.data)
@@ -127,20 +134,20 @@ class GenomeSet(Dataset):
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv01 = nn.Conv1d(in_channels=120, out_channels=96,
-                                kernel_size=4, stride=4)
-        self.pool01 = nn.MaxPool1d(kernel_size=1, stride=2)
+        self.conv01 = nn.Conv1d(in_channels=4, out_channels=96,
+                                kernel_size=11, stride=4)
+        self.pool01 = nn.MaxPool1d(kernel_size=3, stride=2)
         self.conv02 = nn.Conv1d(in_channels=96, out_channels=256,
                                 kernel_size=5, padding=2)
-        self.pool02 = nn.MaxPool1d(kernel_size=1, stride=2)
+        self.pool02 = nn.MaxPool1d(kernel_size=3, stride=2)
         self.conv03 = nn.Conv1d(in_channels=256, out_channels=384,
                                 kernel_size=3, padding=1)
         self.conv04 = nn.Conv1d(in_channels=384, out_channels=384,
                                 kernel_size=3, padding=1)
-        self.conv05 = nn.Conv1d(in_channels=384, out_channels=BATCH_SIZE,
+        self.conv05 = nn.Conv1d(in_channels=384, out_channels=256,
                                 kernel_size=3, padding=1)
-        self.pool05 = nn.MaxPool1d(kernel_size=1, stride=2)
-        self.fc1 = nn.Linear(16, 4096)
+        self.pool05 = nn.MaxPool1d(kernel_size=3, stride=2)
+        self.fc1 = nn.Linear(512, 4096)
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, CLASSES)
 
